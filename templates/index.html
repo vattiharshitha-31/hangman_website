@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hangman Game</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 30px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .game-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            margin-top: 20px;
+        }
+
+        .drawing {
+            width: 280px;
+            height: 320px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .word {
+            font-size: 40px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            margin: 30px;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        button {
+            font-size: 18px;
+            margin: 4px;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid #555;
+            background-color: white;
+        }
+
+        button:hover {
+            background-color: #e8e8e8;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            font-size: 24px;
+            margin: 20px;
+            font-weight: bold;
+        }
+
+        .wrong {
+            font-size: 20px;
+            line-height: 1.8;
+            margin: 20px;
+        }
+
+        .new-game {
+            margin-top: 20px;
+        }
+
+        .new-game button {
+            font-size: 20px;
+            padding: 12px 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎯 HANGMAN GAME</h1>
+
+    <div class="game-area">
+
+        <!-- HANGMAN DRAWING -->
+
+        <div class="drawing">
+
+            <svg width="250" height="300" viewBox="0 0 250 300">
+
+                <!-- STAND - ALWAYS VISIBLE -->
+
+                <!-- Ground -->
+                <line x1="40" y1="260"
+                      x2="210" y2="260"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                <!-- Vertical stand -->
+                <line x1="75" y1="260"
+                      x2="75" y2="40"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                <!-- Top -->
+                <line x1="75" y1="40"
+                      x2="170" y2="40"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                <!-- Support -->
+                <line x1="75" y1="75"
+                      x2="110" y2="40"
+                      stroke="black"
+                      stroke-width="5"/>
+
+                <!-- Rope -->
+                <line x1="170" y1="40"
+                      x2="170" y2="65"
+                      stroke="black"
+                      stroke-width="5"/>
+
+
+                <!-- 1st WRONG ANSWER = HEAD -->
+
+                {% if wrong_guesses >= 1 %}
+
+                <circle cx="170" cy="95"
+                        r="30"
+                        fill="white"
+                        stroke="black"
+                        stroke-width="6"/>
+
+                {% endif %}
+
+
+                <!-- 2nd WRONG ANSWER = BODY -->
+
+                {% if wrong_guesses >= 2 %}
+
+                <line x1="170" y1="125"
+                      x2="170" y2="190"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                {% endif %}
+
+
+                <!-- 3rd WRONG ANSWER = FIRST HAND -->
+
+                {% if wrong_guesses >= 3 %}
+
+                <line x1="170" y1="140"
+                      x2="125" y2="170"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                {% endif %}
+
+
+                <!-- 4th WRONG ANSWER = SECOND HAND -->
+
+                {% if wrong_guesses >= 4 %}
+
+                <line x1="170" y1="140"
+                      x2="215" y2="170"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                {% endif %}
+
+
+                <!-- 5th WRONG ANSWER = FIRST LEG -->
+
+                {% if wrong_guesses >= 5 %}
+
+                <line x1="170" y1="190"
+                      x2="135" y2="240"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                {% endif %}
+
+
+                <!-- 6th WRONG ANSWER = SECOND LEG -->
+
+                {% if wrong_guesses >= 6 %}
+
+                <line x1="170" y1="190"
+                      x2="205" y2="240"
+                      stroke="black"
+                      stroke-width="6"/>
+
+                {% endif %}
+
+            </svg>
+
+        </div>
+
+
+        <!-- GAME SECTION -->
+
+        <div>
+
+            <!-- WORD -->
+
+            <div class="word">
+                {{ display_word }}
+            </div>
+
+
+            <h2>Choose a letter:</h2>
+
+
+            <!-- LETTER BUTTONS -->
+
+            <form method="POST">
+
+                {% for letter in "abcdefghijklmnopqrstuvwxyz" %}
+
+                <button
+                    type="submit"
+                    name="letter"
+                    value="{{ letter }}"
+
+                    {% if letter in guessed_letters %}
+                        disabled
+                    {% endif %}
+
+                    {% if wrong_guesses >= max_wrong %}
+                        disabled
+                    {% endif %}
+                >
+
+                    {{ letter.upper() }}
+
+                </button>
+
+                {% endfor %}
+
+            </form>
+
+
+            <!-- WIN / GAME OVER MESSAGE -->
+
+            <div class="message">
+                {{ message }}
+            </div>
+
+
+            <!-- WRONG GUESSES AND CHANCES -->
+
+            <div class="wrong">
+
+                Wrong guesses:
+                {{ wrong_guesses }} / {{ max_wrong }}
+
+                <br>
+
+                Chances left:
+                {{ max_wrong - wrong_guesses }}
+
+            </div>
+
+
+            <!-- NEW GAME -->
+
+            <div class="new-game">
+
+                <form method="GET">
+
+                    <button type="submit">
+                        🔄 New Game
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
